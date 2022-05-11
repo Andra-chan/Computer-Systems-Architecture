@@ -1,0 +1,56 @@
+     1                                  bits 32 ; assembling for the 32 bits architecture
+     2                                  
+     3                                  ; declare the EntryPoint (a label defining the very first instruction of the program)
+     4                                  global start        
+     5                                  
+     6                                  ; declare external functions needed by our program
+     7                                  extern exit, printf                              ; tell nasm that exit exists even if we won't be defining it
+     8                                  import exit msvcrt.dll                           ; exit is a function that ends the calling process. It is defined in msvcrt.dll
+     9                                  import printf msvcrt.dll                         ; msvcrt.dll contains exit, printf and all the other important C-runtime specific functions
+    10                                  
+    11                                  ; Se dau doua numere naturale a si b (a, b: word, definite in segmentul de date). Sa se calculeze produsul lor si sa se afiseze in urmatorul format: "<a> * <b> = <result>"
+    12                                  ; Exemplu: "2 * 4 = 8"
+    13                                  ; Valorile vor fi afisate in format decimal (baza 10) cu semn.
+    14                                  segment data use32 class=data
+    15                                  
+    16 00000000 0200                            a dw 2
+    17 00000002 0400                            b dw 4
+    18                                          
+    19 00000004 202564202A20256420-             format db " %d * %d  = %d", 0 
+    19 0000000D 203D20256400       
+    20                                          
+    21                                  segment code use32 class=code
+    22                                      start:
+    23 00000000 B800000000                      mov eax, 0
+    24 00000005 66A1[00000000]                  mov ax, [a]         ; AX = a
+    25 0000000B 66F72D[02000000]                imul word[b]        ; DX:AX = AX * b = a * b 
+    26 00000012 6652                            push dx
+    27 00000014 6650                            push ax
+    28 00000016 5A                              pop edx             ; EDX = a * b
+    29                                  
+    30                                          
+    31 00000017 B800000000                      mov eax, 0
+    32 0000001C 66A1[00000000]                  mov ax, [a]         ; convertim a la dword
+    33 00000022 98                              cwde
+    34 00000023 50                              push dword eax
+    35 00000024 89C1                            mov ecx, eax        ; ECX = a dd 
+    36                                          
+    37 00000026 B800000000                      mov eax, 0
+    38 0000002B 66A1[02000000]                  mov ax, [b]         ; convertim a la dword
+    39 00000031 98                              cwde
+    40 00000032 50                              push dword eax      ; EAX = b dd
+    41                                       
+    42 00000033 60                              pushad
+    43                                  
+    44 00000034 52                              push dword edx      ; pune pe stiva edx(a*b)
+    45 00000035 50                              push dword eax      ; pune pe stiva eax(b)
+    46 00000036 51                              push dword ecx      ; pune pe stiva ecx(a)
+    47 00000037 68[04000000]                    push dword format   ; pune pe stiva format
+    48 0000003C FF15[00000000]                  call [printf]       ; format o sa fie de forma a*b=valoarea din edx
+    49 00000042 83C410                          add esp, 4*4        ; 4 parametrii cu cate 4 octeti
+    50                                          
+    51 00000045 61                              popad
+    52                                  
+    53                                          ; exit(0)
+    54 00000046 6A00                            push    dword 0      ; push the parameter for exit onto the stack
+    55 00000048 FF15[00000000]                  call    [exit]       ; call exit to terminate the program

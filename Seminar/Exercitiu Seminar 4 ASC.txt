@@ -1,0 +1,18 @@
+- Care e memory layout la inceput? 
+
+44h 33h 22h 11h 88h 77h 66h 55h
+
+- Care e memory layout la final? 
+
+44h 33h 22h 11h 88h 22h 44h 55h
+
+- Ce face fiecare instructiune? 
+
+1. declaram sirul de tip doubleword a
+2. incarca in ESI offsetul lui a
+3. incarca in EDI offsetul lui a+5
+4. AL = 44h: incarca in AL octetul de la adresa <DS:ESI>, incrementeaza ESI: ESI = a+1(DF = 0, altfel decrementa ESI)
+5. AH = 44h: muta in AH continutul din AL
+6. AL = 33h: incarca in AL octetul de la adresa <DS:ESI>, incrementeaza ESI
+7. AL = 22h: incarca in AL octetul de la adresa <DS:ESI>, incrementeaza ESI
+8. AX = a+5=4422h: La adresa <ES:EDI> se incarcă cuvantul din AX(EDI = EDI + 2, pt. ca DF = 0, altfel EDI = EDI - 2)

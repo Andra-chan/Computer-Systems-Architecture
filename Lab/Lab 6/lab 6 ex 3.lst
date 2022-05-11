@@ -1,0 +1,56 @@
+     1                                  bits 32 ; assembling for the 32 bits architecture
+     2                                  
+     3                                  ; declare the EntryPoint (a label defining the very first instruction of the program)
+     4                                  global start        
+     5                                  
+     6                                  ; declare external functions needed by our program
+     7                                  extern exit               ; tell nasm that exit exists even if we won't be defining it
+     8                                  import exit msvcrt.dll    ; exit is a function that ends the calling process. It is defined in msvcrt.dll
+     9                                                            ; msvcrt.dll contains exit, printf and all the other important C-runtime specific functions
+    10                                  
+    11                                  ; our data is declared here (the variables needed by our program)
+    12                                  segment data use32 class=data
+    13 00000000 121514171922252930-         s db 12h, 15h, 14h, 17h, 19h, 22h, 25h, 29h, 30h, 31h
+    13 00000009 31                 
+    14                                      len equ $-s             ; lungimea sirului s
+    15 0000000A 00<rept>                    pare times len db 0   
+    16 00000014 00<rept>                    impare times len db 0
+    17                                    
+    18                                    
+    19                                  ; Extrageti in 2 siruri diferite nr. pare/impare  
+    20                                  ; segment code use32 class=code
+    21                                      start:
+    22 0000001E B90A000000                     mov ecx, len
+    23 00000023 E32C                           jecxz final
+    24 00000025 BE00000000                     mov esi, 0           ; i = 0
+    25 0000002A BF00000000                     mov edi, 0           ; j = 0
+    26 0000002F BB00000000                     mov ebx, 0           ; k = 0
+    27                                      repeta:
+    28 00000034 8A86[00000000]                 mov al, [s+esi]      ; s[i]
+    29                                         
+    30                                         ; xxxxxxxx AND  (continutul lui al)
+    31                                         ; 00000001
+    32                                         ; 00000000 - par     -> ZF = 1
+    33                                         ; 00000001 - impar   -> ZF = 0
+    34 0000003A A801                           test al, 01h         ; testam daca numarul din al este par sau impar
+    35 0000003C 7409                           jz e_par
+    36                                         
+    37                                     
+    38 0000003E 8883[14000000]                 mov [impare+ebx], al   ; numarul este impar
+    39 00000044 43                             inc ebx
+    40 00000045 EB07                           jmp peste
+    41                                         
+    42                                      e_par:                ; numarul e par
+    43                                  
+    44 00000047 8887[0A000000]                  mov [pare+edi], al
+    45 0000004D 47                              inc edi
+    46                                          
+    47                                      peste:
+    48 0000004E 46                              inc esi
+    49 0000004F E2E3                            loop repeta
+    50                                          
+    51                                      final:
+    52                                      
+    53                                          ; exit(0)
+    54 00000051 6A00                            push    dword 0      ; push the parameter for exit onto the stack
+    55 00000053 FF15[00000000]                  call    [exit]       ; call exit to terminate the program

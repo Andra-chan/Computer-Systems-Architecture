@@ -1,0 +1,8 @@
+mov EAX, 0      ; eax= 0000 0000h
+mov AL, 81h     ; eax= 0000 0081h
+mov AH, 0FFh    ; eax= 0000 FF81h
+mov BL, 80h     ; eax= 0000 FF81h
+idiv BL         ; eax= 0000 8100h
+mov AL, AH      ; eax= 0000 8181h
+cbw             ; eax= 0000 FF81h
+cwde            ; eax= FFFF FF81h

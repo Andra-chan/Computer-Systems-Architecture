@@ -1,0 +1,53 @@
+     1                                  bits 32 ; assembling for the 32 bits architecture
+     2                                  
+     3                                  ; declare the EntryPoint (a label defining the very first instruction of the program)
+     4                                  global start        
+     5                                  
+     6                                  ; declare external functions needed by our program
+     7                                  extern exit               ; tell nasm that exit exists even if we won't be defining it
+     8                                  import exit msvcrt.dll    ; exit is a function that ends the calling process. It is defined in msvcrt.dll
+     9                                                            ; msvcrt.dll contains exit, printf and all the other important C-runtime specific functions
+    10                                  
+    11                                  ; M, N, P - double word
+    12                                  segment data use32 class=data
+    13                                      
+    14 00000000 5777BE9B                    m dd 10011011101111100111011101010111b
+    15 00000004 BE9B5777                    n dd 01110111010101111001101110111110b
+    16 00000008 00000000                    p dd 0
+    17                                      
+    18                                  ; bitii 0-6 din P coincid cu bitii 10-16 a lui M
+    19                                  ; bitii 7-20 din P concid cu bitii obtinuti 7-20 in urma aplicarii M AND N.
+    20                                  ; bitii 21-31 din P coincid cu bitii 1-11 a lui N.
+    21                                  segment code use32 class=code
+    22                                      start:
+    23                                      
+    24 00000000 BB00000000                  mov ebx, 0
+    25                                          
+    26                                      ; bitii 0-6 din P coincid cu bitii 10-16 a lui M
+    27 00000005 A1[00000000]                mov eax, [m]
+    28 0000000A 2500FC0100                  and eax, 00000000000000011111110000000000b
+    29 0000000F B10A                        mov cl, 10
+    30 00000011 D3C8                        ror eax, cl                ; rotim 10 pozitii catre dreapta
+    31 00000013 09C3                        or ebx, eax                ; se afla in ebx
+    32                                      
+    33                                      ; bitii 7-20 din P concid cu bitii obtinuti 7-20 in urma aplicarii M AND N. 
+    34 00000015 B900000000                  mov ecx, 0
+    35                                      
+    36 0000001A A1[00000000]                mov eax, [m]
+    37 0000001F 2305[04000000]              and eax, [n]                ; in eax se afla m and n
+    38                                      
+    39 00000025 2580FF1F00                  and eax, 00000000000111111111111110000000b
+    40 0000002A 09C1                        or ecx, eax
+    41                                      
+    42                                      ; bitii 21-31 din P coincid cu bitii 1-11 a lui N.
+    43 0000002C BA00000000                  mov edx, 0
+    44                                      
+    45 00000031 A1[04000000]                mov eax, [n]
+    46 00000036 25FE0F0000                  and eax, 00000000000000000000111111111110b
+    47 0000003B B114                        mov cl, 20
+    48 0000003D D3C0                        rol eax, cl                 ; rotim 20 pozitii catre stanga
+    49 0000003F 09C2                        or edx, eax                 ; in edx se afla p
+    50                                       
+    51                                          ; exit(0)
+    52 00000041 6A00                            push    dword 0      ; push the parameter for exit onto the stack
+    53 00000043 FF15[00000000]                  call    [exit]       ; call exit to terminate the program

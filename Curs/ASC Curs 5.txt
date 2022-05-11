@@ -1,0 +1,2 @@
+Oricarui nume simbolic ii este asociat ca valoare numerica adresa sa din memorie.
+Sistemul de adresare pe 32 de biti reprezinta o cooperare intre procesor si sistemul de operare
